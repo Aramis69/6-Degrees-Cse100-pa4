@@ -25,7 +25,8 @@ public:
     //constructor
     ActorNode(string n) : name(n), dist(numeric_limits<int>::max()),
                             prev(nullptr), prevMov(nullptr) {} 
-    
+   
+    ~ActorNode(){}
 };
 
 #endif 

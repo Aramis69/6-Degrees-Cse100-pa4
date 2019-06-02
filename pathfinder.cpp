@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
     
     myGraph->loadActorPair(argv[3], outFile); 
 
+    delete(myGraph);
+
     return 1;      
  
 }

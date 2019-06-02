@@ -22,9 +22,19 @@ ActorGraph::~ActorGraph()
 }
 
 void ActorGraph::deleteAll(){
-    map->clear();
+    //erase elements in actor map
+    
+    for(auto it : *map){
+        delete(it.second);
+    }
+
     delete map;
-    movieMap->clear();
+    //erase elements in movie map
+    
+    for(auto it : *movieMap){
+        delete(it.second);
+    }
+    
     delete movieMap;
 }
 

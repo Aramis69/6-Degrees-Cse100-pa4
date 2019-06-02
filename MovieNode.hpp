@@ -23,7 +23,8 @@ public:
 
     //constructor 
     MovieNode(string n, int y) : name(n), year(y) {}
-    
+
+    ~MovieNode(){} 
 };
 
 #endif
