@@ -19,12 +19,20 @@ public:
 
     //BFS tools
     int dist;
+    //reused in MST
     ActorNode* prev;
+    //reused in MST
     MovieNode* prevMov;    
+   
+    //Dijistras tools
+    bool done;
     
+    //used in MST
+    int size;
+     
     //constructor
-    ActorNode(string n) : name(n), dist(numeric_limits<int>::max()),
-                            prev(nullptr), prevMov(nullptr) {} 
+    ActorNode(string n) : name(n),size(1), dist(numeric_limits<int>::max()),
+                            prev(nullptr), prevMov(nullptr), done(false) {} 
    
     ~ActorNode(){}
 };

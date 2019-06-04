@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     //to set weights or not
     bool weight = false;
     char* argument = argv[2];
-    if(argument[0] == 'W'){
+    if(argument[0] == 'w'){
         weight = true;
     }
 
@@ -28,8 +28,14 @@ int main(int argc, char** argv) {
     ofstream outFile;
     outFile.open(argv[4], ios::out);
     
-    myGraph->loadActorPair(argv[3], outFile); 
-
+    if(weight == false){
+        myGraph->loadActorPair(argv[3], outFile); 
+    }
+    else{
+        cout << "here" <<endl;
+        myGraph->weightedActorPair(argv[3], outFile);
+    }
+    
     delete(myGraph);
 
     return 1;      

@@ -16,25 +16,25 @@
 
 using namespace std;
 
+//minimum priority que
+
 ActorGraph::~ActorGraph()
 {
     deleteAll();
 }
 
 void ActorGraph::deleteAll(){
-    //erase elements in actor map
-    
+
+    //erase elements in actor map    
     for(auto it : *map){
         delete(it.second);
     }
-
     delete map;
+
     //erase elements in movie map
-    
     for(auto it : *movieMap){
         delete(it.second);
     }
-    
     delete movieMap;
 }
 
@@ -46,7 +46,7 @@ ActorGraph::ActorGraph(void) {
     movieMap = new unordered_map<string,MovieNode*>();
 }
 
-/**/
+/*this is a helper function that is used by load actor pair*/
 string ActorGraph::outputPath(string one, string two){
 
     unordered_map<string,int> distances;
@@ -125,7 +125,7 @@ string ActorGraph::outputPath(string one, string two){
     return path;
 }
 
-/**/
+/*loads actor pairs and finds unweighted paths between them*/
 bool ActorGraph::loadActorPair(const char* in_filename, ofstream& out) {
 
     // Initialize the file stream
@@ -184,6 +184,201 @@ bool ActorGraph::loadActorPair(const char* in_filename, ofstream& out) {
     return true;
 }
 
+/* Path builder using dijkstas algorithm
+ * Goes through actor map and finds shortest path between two actors
+ * Returns: string containing path from one to two
+ * */
+string ActorGraph::djPath(string one,string two){
+
+    //reset actor nodes variables that are used for dijkstras path
+    for(auto it : *map){
+        //grab actorNode from iterator
+        ActorNode* set = it.second;
+        //set feilds
+        set->dist = numeric_limits<int>::max();
+        set->prev = nullptr;
+        set->prevMov = nullptr;
+        set->done = false;
+    }
+
+    //pq for actor nodes and weights
+    priority_queue<pair<ActorNode*,unsigned int>, vector<pair<ActorNode*,unsigned
+                int>>, compare_minPair> nodes; 
+    //get beggining node
+    ActorNode* first = (*map)[one];
+    //Actor node of end to check when we reach node
+    ActorNode* end = (*map)[two];
+    //set new distance
+    first->dist = 0;
+    //make pair for this node 
+    pair<ActorNode*,unsigned int> firstPair = make_pair(first,0);
+    nodes.push(firstPair);
+
+    //while stuff in pq
+    while(!nodes.empty()){
+        //top and pop 
+        pair<ActorNode*,unsigned int> curr = nodes.top(); 
+        nodes.pop();
+        
+        //check to see if we have reached the end node 
+        if((curr.first->name).compare(end->name) == 0){
+                break;
+        }
+        
+        //only do if this node has not been marked as done
+        if(curr.first->done == false){
+            curr.first->done = true;      
+
+            //iterate through this actors movies
+            vector<MovieNode*>::iterator it = curr.first->Movies.begin();
+            //go through all movies for this actor
+            for( ; it != curr.first->Movies.end(); it++){
+                //go through every actor in the movie    
+                vector<ActorNode*>::iterator mov = (*it)->Actors.begin();
+                //get weight of this movie 
+                unsigned int distance = curr.first->dist + (1 +(2019 - ((*it)->year)));
+                //for all neighbors
+                for(; mov != (*it)->Actors.end();mov++){
+                    //currents neighbor
+                    ActorNode* neighbor = *mov;
+                    //if this neighbors distance is greater than this new path
+                    if(distance < neighbor->dist){
+                        //update feilds
+                        neighbor->dist = distance;
+                        neighbor->prev = curr.first;
+                        neighbor->prevMov = *it;
+                        //make new pair for this node
+                        pair<ActorNode*,unsigned int> enQ = make_pair(neighbor,distance);
+                        nodes.push(enQ);
+                    }
+                }
+            }
+        }
+    }
+
+    //empty pq
+    while(!nodes.empty()){
+        nodes.pop();
+    }
+
+    //movie of last node
+    MovieNode* buildMov = end->prevMov;
+    ActorNode* build = end;
+    //build string path
+    string path;
+    bool loop = true;
+    //loop and build string
+    while(loop){
+        //make the path for this actor and move
+        string string2 = "";
+        string2 += string("--") + "[" + buildMov->name + "#@" + 
+                        to_string(buildMov->year) + "]" + "-->" + "(" + 
+                        build->name + ")";
+        //add to the path 
+        path.insert(0,string2);
+        //move to the next previous node
+        build = build->prev;
+        buildMov = build->prevMov;
+        //once you reach the start actor
+        if(build->name.compare(first->name) == 0){
+            //insert last part of path
+            path.insert(0 ,"(" + one + ")");
+            //break loop
+            loop = false;
+        }
+    }
+
+    //return the path build
+    return path;
+}
+
+/*  Function that gets pairs of actors and calls helper to return a string
+ *  and output to the file
+ *  No Return
+ *  Outfile is expected to be changed.
+ * */
+void ActorGraph::weightedActorPair(const char* file,ofstream& out){
+
+    // Initialize the file stream
+    ifstream infile(file);
+    
+    out << "(actor)--[movie#@year]-->(actor)--..." << endl; 
+    
+    bool have_header = false;
+    // keep reading lines until the end of file is reached
+    while (infile) {
+        //hold the line we about to get
+        string s;
+    
+        // get the next line
+        if (!getline( infile, s )) break;
+        
+        if (!have_header) {
+            // skip the header
+            have_header = true;
+            continue;
+        }
+        
+        istringstream ss( s );
+        //to hold different part of this line
+        vector <string> record;
+
+        //while on the same line
+        while (ss) {
+            string next;
+            // get the next string before hitting a tab character and put it in 'next'
+            if (!getline( ss, next, '\t' )) break;
+            //push this actor name
+            record.push_back( next );
+        }
+    
+        if (record.size() != 2) {
+            // we should have exactly 3 columns
+            continue;
+        }
+        //two actor names
+        string actor1(record[0]);
+        string actor2(record[1]);
+        
+        //if these actors are already in the Actor Graph
+        if((map->find(actor1) != map->end()) && (map->find(actor2) != map->end())){
+            //call function that will return path as string
+            string myReturn = djPath(actor1, actor2);
+            //output this string to outfile
+            out << myReturn << endl;
+        }
+        else{
+            
+            out << endl;
+        }
+    }
+
+}
+
+
+/*  Function called by movietraveler after graph is built
+ *  Will call functions to capture edges of the graph and build a 
+ *  MST out of all the actor nodes
+ *  This function will construct a Disjoint Set in order to call its functions
+ *  which will build the MST and output the MST edges to the outFile
+ *
+ * */
+void ActorGraph::travelMovies(ofstream& out){
+    
+    //Call function to populate priority que of all edges in actor map
+    auto it = map->begin();
+    //make disSet map
+    DisjointSet* disSet = new DisjointSet();
+    //start at whatever actor is first in the map
+    disSet->makeEdges(map,movieMap);
+
+    disSet->makeMST(map);
+    
+    disSet->outputMST(out,map);
+    
+    delete(disSet);
+     
+}
 
 /** You can modify this method definition as you wish
  *
