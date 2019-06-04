@@ -1,3 +1,7 @@
+/*  File: ActorNode.hpp
+ *  Author: Aramis Conde
+ *  file defines Actor Node class and instance variables
+ * */
 #ifndef ACTORNODE_HPP
 #define ACTORNODE_HPP 
 
@@ -7,7 +11,8 @@
 using namespace std;
 
 class MovieNode;
-
+/*  Actor Node class with constructor and instance variables
+ * */
 class ActorNode{
 
 public:

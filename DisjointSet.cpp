@@ -98,9 +98,9 @@ void DisjointSet::makeEdges(unordered_map<string, ActorNode*>* map,
 }
 
 
-/*  Goes through vector of edges and attempts to make an MST 
+/*  Goes through vector of edges and attempts to make an MST
+ *  Uses maps to get the values
  *  No return 
- *  
  * */
 void DisjointSet::makeMST(unordered_map<string,ActorNode*>* map){
 
@@ -196,6 +196,12 @@ bool DisjointSet::uniteSets(ActorNode* one, ActorNode* two, MovieNode* movie){
         }
 }
 
+/*  goes through the build MST and prints out edges that connects two actorNodes
+ *  Takes in an outfile stream to write to and an unordered map to extract
+ *  movie edges
+ *  no return
+ *
+ * */
 void DisjointSet::outputMST(ofstream& out,unordered_map<string,ActorNode*>* map){
 
     int edgeWeights = 0;

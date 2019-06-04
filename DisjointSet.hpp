@@ -1,11 +1,16 @@
-
+/* File: DisjointSet.hpp
+ * Author:Aramis Conde
+ * Hold Disjoint set class definition
+ * */
 #ifndef DISJOINTSET_HPP
 #define DISJOINTSET_HPP 
 
 #include "ActorGraph.hpp"
 
 using namespace std;
-
+/*  DisjointSet class 
+ *  defines constructors and functions for using this
+ * */
 class DisjointSet{
 
 protected:

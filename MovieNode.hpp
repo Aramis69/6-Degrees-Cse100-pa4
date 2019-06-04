@@ -1,4 +1,7 @@
-
+/*  File: MovieNode.hpp
+ *  Author:Aramis Conde
+ *  Defines Movie node class
+ * */
 #ifndef MOVIENODE_HPP
 #define MOVIENODE_HPP 
 
@@ -8,7 +11,7 @@
 using namespace std;
 
 class ActorNode;
-
+/*defines movie node class with constructor and instance variables*/
 class MovieNode{
 
 public:
